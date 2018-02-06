@@ -18,6 +18,6 @@ unsigned long binarySearch(node *arr, unsigned long l, unsigned long r, unsigned
     }
     // if we reach here, then element was
     // not present
-    return rtemp+1;
+    return rtemp+2;
 }
 

@@ -3,7 +3,7 @@ typedef struct {
 	char name[184];
 	double lat, lon;           // Node position
 	unsigned short nsucc=0;      // Number of node successors; i. e. length of successors
-	unsigned long successors[];
+	unsigned long *successors;
 } node;
 
 
