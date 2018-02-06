@@ -11,25 +11,23 @@
 #include <climits>
 #include "Structures.cpp"
 #include "BinarySearch.cpp"
+#include "QuickSort.cpp"
 
 //#include "QuickSort.cpp"
 
-
-
 unsigned long nodeIndex=0;
 node *nodes;
-unsigned long *conns;
-
+connection *conns;
+unsigned long connscounter=0;
 
 int main() {
 //	printf("%lu", ULONG_MAX);
-
 
 	if((nodes = (node*)malloc(nnodes*(sizeof(node))))==NULL){
     	std::cerr << "Cannot allocate enough memory.\n" << std::endl;
 		return 1;
 	}
-	if((conns = (unsigned long*)malloc(connNumber*3*(sizeof(unsigned long))))==NULL){
+	if((conns = (connection *)malloc(connNumber*(sizeof(connection))))==NULL){
     	std::cerr << "Cannot allocate enough memory.\n" << std::endl;
 		return 1;
 	}
@@ -69,8 +67,9 @@ int main() {
 		// output the line
 		token_type= "";
 		//std::cout << str << std::endl;
+	/*************************************************************************************************************/
 		if((pos=str.find(delimiter)) != std::string::npos){
-
+		/*********************************************************************************************************/
 			token_type = str.substr(0, pos);	
 			str.erase(0, pos + delimiter.length());	
 			
@@ -81,7 +80,8 @@ int main() {
 			pos=str.find(delimiter);
 			token_name = str.substr(0, pos);
 			str.erase(0, pos + delimiter.length());	
-/**********************************************************************************************************************/
+		/*********************************************************************************************************/
+		/*********************************************************************************************************/
 			if(token_type.compare("node")==0){
 
 				(*(nodes+nodeIndex)).id=std::stoul(token_id, nullptr, 10);
@@ -105,94 +105,109 @@ int main() {
 				nodeIndex++;
 
 			}
-/**********************************************************************************************************************/
+	/**********************************************************************************************************************/
 			else if (token_type.compare("way")==0){
-
+	/**********************************************************************************************************************/
 				for (field_splitter=0; field_splitter < 4; field_splitter++){
 					pos=str.find(delimiter);
 					str.erase(0, pos + delimiter.length());
 				}
-
+	/**********************************************************************************************************************/
 				pos=str.find(delimiter);
 				token_oneway=str.substr(0, pos);;
 				str.erase(0, pos + delimiter.length());
-
 
 				pos=str.find(delimiter);
 				str.erase(0, pos + delimiter.length());
 
 				indexForNodes=0;
-
+	/**********************************************************************************************************************/
+			/*************************************************************************************************************/
 				while((pos=str.find(delimiter))!=std::string::npos){
 					token_info=str.substr(0,pos);
 					str.erase(0, pos + delimiter.length());					
 					
 					idwaymember=std::stoul(token_info,nullptr, 10);
 					binary_search_result=binarySearch(nodes, 0, nodeIndex-1, idwaymember);
-					
-					std::cout<<token_info<<std::endl;				
-					std::cout<<idwaymember<<std::endl;			
-					std::cout<<binary_search_result<<std::endl;
 
-					
 					if (binary_search_result<nodeIndex){
 						connectionsID[indexForNodes]=idwaymember;
 						connections[indexForNodes]=binary_search_result;
 						indexForNodes++;					
 					}					
 				}
-
+			/*************************************************************************************************************/
+			/*************************************************************************************************************/	
 				token_info=str;
 				idwaymember=std::stoul(token_info, nullptr, 10);
 				binary_search_result=binarySearch(nodes, 0, nodeIndex-1, idwaymember);
-				std::cout<<token_info<<std::endl;
-				std::cout<<idwaymember<<std::endl;				
-				std::cout<<binary_search_result<<std::endl;			
+
+	
 				if (binary_search_result<nodeIndex){
 					connectionsID[indexForNodes]=idwaymember;
 					connections[indexForNodes]=binary_search_result;
 					indexForNodes++;
 				}
-				std::cout<<indexForNodes<<std::endl;
+			/*************************************************************************************************************/
 
+			/**********************************************************************************************************************/
 				if(indexForNodes>=2){				
+			/*************************************************************************************************************/
 					if(token_oneway.compare("oneway")==0){
 
 						for(indexForSuccesors=0; indexForSuccesors<indexForNodes-1; indexForSuccesors++){
+
 							pos1Node=connections[indexForSuccesors];
 							pos1NodeSucc=nodes[pos1Node].nsucc;
 
 							nodes[pos1Node].nsucc = nodes[pos1Node].nsucc+1;
-
 							
-
+							(conns+connscounter)->source=connections[indexForSuccesors];
+							(conns+connscounter)->destination=connections[indexForSuccesors+1];
+							connscounter++;
+			/*************************************************************************************************************/
+			/*************************************************************************************************************/
 							set_Maximum_node_Descendant_N(pos1NodeSucc+1, &nodemembercounter);
+			/*************************************************************************************************************/
 						}
+			/*************************************************************************************************************/
 						NConnections=NConnections+(indexForNodes-1);
+			/*************************************************************************************************************/
 					}
 					else {
-
-
+			/*************************************************************************************************************/
 						for(indexForSuccesors=0; indexForSuccesors<indexForNodes-1; indexForSuccesors++){
 							pos1Node=connections[indexForSuccesors];
 							pos1NodeSucc=nodes[pos1Node].nsucc;
 	
 							pos2Node=connections[indexForSuccesors+1];
-							pos2NodeSucc=nodes[pos1Node+1].nsucc;
+							pos2NodeSucc=nodes[pos2Node].nsucc;
 
 							nodes[pos1Node].nsucc = pos1NodeSucc+1;
 							nodes[pos2Node].nsucc = pos2NodeSucc+1;
-							
-
-							set_Maximum_node_Descendant_N(nodes[connections[indexForSuccesors]].nsucc, &nodemembercounter);
-							set_Maximum_node_Descendant_N(nodes[connections[indexForSuccesors+1]].nsucc, &nodemembercounter);
+			/*************************************************************************************************************/
+			/*************************************************************************************************************/
+							(conns+connscounter)->source=connections[indexForSuccesors];
+							(conns+connscounter)->destination=connections[indexForSuccesors+1];
+							connscounter++;
+							(conns+connscounter)->source=connections[indexForSuccesors+1];
+							(conns+connscounter)->destination=connections[indexForSuccesors];
+							connscounter++;
+			/*************************************************************************************************************/
+			/*************************************************************************************************************/
+							set_Maximum_node_Descendant_N(nodes[pos1Node].nsucc, &nodemembercounter);
+							set_Maximum_node_Descendant_N(nodes[pos2Node].nsucc, &nodemembercounter);
+			/*************************************************************************************************************/
+			/*************************************************************************************************************/
 						}
+			/*************************************************************************************************************/
 						NConnections=NConnections+2*(indexForNodes-1);
+			/*************************************************************************************************************/
 					}
 				}
 
 			}
-/**********************************************************************************************************************/
+			/**********************************************************************************************************************/
 			else{
 //				std::cout<< 1 << std::endl;
 			}
@@ -200,16 +215,49 @@ int main() {
 		}		 
 		// now we loop back and get the next line in 'str'
 	}
-//	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 1543089000));
-//	printf("%d\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 1543089000)].nsucc);
-/*	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 8774488));
-	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 8774492));
-	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 8774487));	
-	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 8774492));
-	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 8774492));
-	printf("%lu\n", NConnections);*/
-	printf("%lu\n", binarySearch(nodes, 0, nodeIndex-1, 1543265059));
- 	in.close();
+
+/**********************************Ordering Connections*****************************************************************/
+	quickSort(conns, 0, NConnections-1);
+/**********************************Ordering Connections*****************************************************************/
+
+/***********************************SETTING OFFSET**********************************************************************/	
+	for(connscounter=0; connscounter<NConnections; connscounter=connscounter+(nodes+(conns+connscounter)->source)->nsucc){
+		nodes[conns[connscounter].source].offset=connscounter;
+	}
+/***********************************SETTING OFFSET**********************************************************************/	
+
+
+
+
+
+
+
+
+/*
+	printf("%lu\n", NConnections);
+	printf("%lu\n", connscounter);
+	printf("%lu, %hu, %lu\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 8670491)].id, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670491)].nsucc, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670491)].offset);
+	printf("%lu, %lu\n", (conns)->source, (conns)->destination);
+	printf("%lu, %lu\n", (conns+1)->source, (conns+1)->destination);
+	printf("%lu, %hu, %lu\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 8670492)].id, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670492)].nsucc, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670492)].offset);
+	printf("%lu, %lu\n", (conns+2)->source, (conns+2)->destination);
+	printf("%lu, %lu\n", (conns+3)->source, (conns+3)->destination);
+	printf("%lu, %lu\n", (conns+4)->source, (conns+4)->destination);
+	printf("%lu, %hu, %lu\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 8670493)].id, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670493)].nsucc, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670493)].offset);
+	printf("%lu, %lu\n", (conns+5)->source, (conns+5)->destination);
+	printf("%lu, %lu\n", (conns+6)->source, (conns+6)->destination);
+	printf("%lu, %lu\n", (conns+7)->source, (conns+7)->destination);
+
+*/
+/*
+	printf("%lu, %hu\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 8670491)].id, nodes[binarySearch(nodes, 0, nodeIndex-1, 8670491)].nsucc);
+	printf("%hu\n", nodemembercounter);
+
+	printf("%lu, %hu\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 8774490)].id, nodes[binarySearch(nodes, 0, nodeIndex-1, 8774490)].nsucc);
+	printf("%hu\n", nodemembercounter);
+	printf("%lu, %hu\n", nodes[binarySearch(nodes, 0, nodeIndex-1, 8774494)].id, nodes[binarySearch(nodes, 0, nodeIndex-1, 8774494)].nsucc); 	
+*/
+	in.close();
  	free(nodes);
   	return 0;
 }

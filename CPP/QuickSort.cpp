@@ -1,28 +1,31 @@
-void swap(node *a, node *b)
+void swap(connection *a, connection *b)
 {
-    unsigned long id = a->id;
-	double lon=a->lon;
-	double lat=a->lat;
+    unsigned long source = a->source;
+	unsigned long destination=a->destination;
+	double weight=a->weight;
 
-    a->id = b->id;
-    a->lon = b->lon;
-    a->lat = b->lat;
-	b->id = id;
-	b->lon = lon;
-	b->lat = lat;
+    a->source = b->source;
+    a->destination = b->destination;
+    a->weight = b->weight;
+	b->source = source;
+	b->destination = destination;
+	b->weight = weight;
 }
 
-unsigned long partition (node* arr, int low, int high, int pivotN)
+/* The main function that implements QuickSort
+ arr[] --> Array to be sorted,
+  low  --> Starting index,
+  high  --> Ending index */
+unsigned long partition (connection* arr, int low, int high)
 {
-    unsigned long pivot = (arr+pivotN)->id;    // pivot
-	/*printf("%lu\n", pivot); */
+    unsigned long pivot = (arr+high)->source;    // pivot
     unsigned long i = (low - 1);  // Index of smaller element
  
-    for (int j = low; j <= pivotN- 1; j++)
+    for (int j = low; j <= high- 1; j++)
     {
         // If current element is smaller than or
         // equal to pivot
-        if ((arr+j)->id <= pivot)
+        if ((arr+j)->source <= pivot)
         {
             i++;    // increment index of smaller element
             swap((arr+i), (arr+j));
@@ -30,7 +33,6 @@ unsigned long partition (node* arr, int low, int high, int pivotN)
     }
 
     swap(arr+i + 1, arr+high);
-
     return (i + 1);
 }
  
@@ -38,13 +40,13 @@ unsigned long partition (node* arr, int low, int high, int pivotN)
  arr[] --> Array to be sorted,
   low  --> Starting index,
   high  --> Ending index */
-void quickSort(node *arr, int low, int high)
+void quickSort(connection *arr, int low, int high)
 {
     if (low < high)
     {
         /* pi is partitioning index, arr[p] is now
            at right place */
-        unsigned long pi = partition(arr, low, high, 6);
+        unsigned long pi = partition(arr, low, high);
  
         // Separately sort elements before
         // partition and after partition
@@ -52,3 +54,5 @@ void quickSort(node *arr, int low, int high)
         quickSort(arr, pi + 1, high);
     }
 }
+
+
